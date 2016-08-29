@@ -1,54 +1,32 @@
 package com.example.alex.wordplay;
 
-import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.os.AsyncTask;
 
 import android.text.InputType;
-import android.util.JsonReader;
-import android.util.Log;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
-import android.widget.Spinner;
 import android.widget.TextView;
 
 
 import com.google.android.gms.common.api.GoogleApiClient;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.JSONTokener;
-import org.w3c.dom.Text;
-
-import java.io.BufferedReader;
 import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
-import java.net.HttpURLConnection;
-import java.net.InetAddress;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
     EditText wordText;
     TextView wordDefinition;
-    Intent myIntent;
+    Intent libaryIntent;
     ArrayList<Word> words = new ArrayList<>();
     ArrayList<Book> books = new ArrayList<>();
 
@@ -63,8 +41,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        myIntent = new Intent(this, BookActivity.class);
-        wordText = (EditText) findViewById(R.id.wordText);
+        libaryIntent = new Intent(this, LibraryActivity.class);
         wordDefinition = (TextView) findViewById(R.id.wordDefinition);
         Button addWordButton = (Button) findViewById(R.id.addWordButton);
         final Button addBookButton = (Button) findViewById(R.id.addBookButton);
@@ -80,8 +57,8 @@ public class MainActivity extends AppCompatActivity {
         addWordButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                myIntent.putExtra("Books",books);
-                startActivity(myIntent);
+                libaryIntent.putExtra("Books",books);
+                startActivity(libaryIntent);
             }
         });
 

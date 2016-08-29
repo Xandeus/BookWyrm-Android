@@ -11,7 +11,7 @@ import java.util.Set;
 public class Book implements Comparable<Book>, Serializable {
     private String title,author;
     private int numPages;
-    ArrayList<Word> associatedWords;
+    private ArrayList<Word> associatedWords;
     public Book(String title,String author, int numPages){
         this.title = title;
         this.author = author;
@@ -31,7 +31,9 @@ public class Book implements Comparable<Book>, Serializable {
     public String toString(){
         return title + " " + "by: " + author;
     }
-
+    public ArrayList<Word> getWords(){
+        return associatedWords;
+    }
     @Override
     public int compareTo(Book book) {
         if(getTitle().equalsIgnoreCase(book.getTitle())&& getAuthor().equalsIgnoreCase(book.getAuthor())){
