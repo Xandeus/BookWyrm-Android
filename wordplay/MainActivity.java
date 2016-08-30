@@ -3,6 +3,7 @@ package com.example.alex.wordplay;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.support.v7.app.AlertDialog;
@@ -10,6 +11,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
 import android.text.InputType;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -20,39 +22,68 @@ import android.widget.TextView;
 import com.google.android.gms.common.api.GoogleApiClient;
 
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
-    EditText wordText;
-    TextView wordDefinition;
+    TextView display;
     Intent libaryIntent;
-    ArrayList<Word> words = new ArrayList<>();
     ArrayList<Book> books = new ArrayList<>();
+    FileOutputStream outputStream;
+    ObjectOutputStream objectStream;
+    FileInputStream inputStream;
+    ObjectInputStream objInStream;
+    String fileName = "bookData";
+    final String PREFS_NAME = "prefFile";
+    boolean firstOpen = true;
 
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
      */
-    private GoogleApiClient client;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
         libaryIntent = new Intent(this, LibraryActivity.class);
-        wordDefinition = (TextView) findViewById(R.id.wordDefinition);
+        display = (TextView) findViewById(R.id.wordDefinition);
         Button addWordButton = (Button) findViewById(R.id.addWordButton);
         final Button addBookButton = (Button) findViewById(R.id.addBookButton);
-        FileInputStream fis;
-        try {
-            fis = openFileInput("Books");
-            ObjectInputStream ois = new ObjectInputStream(fis);
-            ArrayList<Object> returnlist = (ArrayList<Object>) ois.readObject();
-            ois.close();
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (settings.getBoolean("firstOpen", true)) {
+            //the app is being launched for first time, do something
+            Log.d("Comments", "First time");
+            display.setText("FIRST TIME");
+            // first time task
+            try {
+                outputStream = openFileOutput(fileName,MODE_PRIVATE);
+                objectStream = new ObjectOutputStream(outputStream);
+                objectStream.writeObject(books);
+                outputStream.close();
+                Log.v("MyApp","Read input");
+            } catch (Exception e) {
+                Log.v("MyApp","File did not write");
+                e.printStackTrace();
+            }
+            // record the fact that the app has been started at least once
+            settings.edit().putBoolean("firstOpen", false).apply();
+        }
+        else{
+            try {
+                inputStream = openFileInput(fileName);
+                objInStream = new ObjectInputStream(inputStream);
+                books = (ArrayList<Book>) objInStream.readObject();
+                inputStream.close();
+                Log.v("MyApp","Read input");
+            } catch (Exception e) {
+                Log.v("MyApp","File did not write");
+                e.printStackTrace();
+            }
+            // rec
+            display.setText("Not the first time");
         }
         addWordButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -91,6 +122,16 @@ public class MainActivity extends AppCompatActivity {
                                     books.add(new Book(bookTitle.getText().toString(),bookAuthor.getText().toString(),Integer.parseInt(numPages.getText().toString())));
                                     for(int i = 0;i<100;i++){
                                         books.add(new Book(""+i,"Mister Robot",1));
+                                    }
+                                    try {
+                                        outputStream = openFileOutput(fileName,MODE_PRIVATE);
+                                        objectStream = new ObjectOutputStream(outputStream);
+                                        objectStream.writeObject(books);
+                                        outputStream.close();
+                                        Log.v("MyApp","Read input");
+                                    } catch (Exception e) {
+                                        Log.v("MyApp","File did not write");
+                                        e.printStackTrace();
                                     }
                                 }
                             })

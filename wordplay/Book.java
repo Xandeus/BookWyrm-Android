@@ -41,4 +41,8 @@ public class Book implements Comparable<Book>, Serializable {
         }
         return getTitle().compareTo(book.getTitle());
     }
+
+    public void setTitle(String title){
+        this.title = title;
+    }
 }

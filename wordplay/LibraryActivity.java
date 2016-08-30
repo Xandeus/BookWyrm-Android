@@ -17,7 +17,9 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.FileOutputStream;
 import java.io.InputStreamReader;
+import java.io.ObjectOutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -27,25 +29,34 @@ public class LibraryActivity extends AppCompatActivity {
     ArrayList<Book> books;
     Book selectedBook;
     Intent bookIntent;
-
+    Intent mainIntent;
+    ArrayAdapter<String> adapter;
     String defWord;
-        @Override
+
+    FileOutputStream outputStream;
+    ObjectOutputStream objectStream;
+    String fileName = "bookData";
+
+    @Override
         protected void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             setContentView(R.layout.activity_library);
             bookIntent = new Intent(this, BookActivity.class);
+            mainIntent = new Intent(this, MainActivity.class);
             Bundle extras = getIntent().getExtras();
             if (extras != null) {
                 Log.i("EXTRA","Did it");
-                books = (ArrayList<Book>) getIntent().getSerializableExtra("Books");;
+                books = (ArrayList<Book>) getIntent().getSerializableExtra("Books");
                 //The key argument here must match that used in the other activity
             }
+
             // Get ListView object from xml
             listView = (ListView) findViewById(R.id.bookList);
 
             // Defined Array values to show in ListView
             String[] bookNames = new String[books.size()];
             for(int i = 0;i<bookNames.length;i++){
+                Log.i("Words",books.get(i).getWords().toString());
                 bookNames[i] = books.get(i).toString();
             }
             // Define a new Adapter
@@ -54,7 +65,7 @@ public class LibraryActivity extends AppCompatActivity {
             // Third parameter - ID of the TextView to which the data is written
             // Forth - the Array of data
 
-            ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
+            adapter = new ArrayAdapter<>(this,
                     android.R.layout.simple_list_item_1, android.R.id.text1, bookNames);
 
 
@@ -73,6 +84,12 @@ public class LibraryActivity extends AppCompatActivity {
 
             });
         }
+    @Override
+    public void onBackPressed() {
+        // your code.
+        Log.i("BACK","Went back");
+        startActivity(mainIntent);
+    }
     public void buildDialog(){
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
                 LibraryActivity.this);
@@ -132,14 +149,11 @@ public class LibraryActivity extends AppCompatActivity {
                 try {
                     BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
                     StringBuilder stringBuilder = new StringBuilder();
-                    String line;
                     JSONArray wordQuery = new JSONArray(bufferedReader.readLine());
                     wordDefs = new String[wordQuery.length()];
                     wordTypes = new String[wordQuery.length()];
                     for(int i = 0;i<wordQuery.length();i++){
                         rec = wordQuery.getJSONObject(i);
-                        Log.i("rec",rec.toString());
-                        Log.i("array",rec.getString("defenition"));
                         wordDefs[i] = rec.getString("defenition");
                         wordTypes[i] = rec.getString("type");
 
@@ -161,7 +175,19 @@ public class LibraryActivity extends AppCompatActivity {
             }
             selectedBook.addWord(new Word(defWord,wordDefs,wordTypes,selectedBook.getTitle()));
             Log.i("INFO", response);
+            adapter.notifyDataSetChanged();
             bookIntent.putExtra("Selected Book", selectedBook);
+            bookIntent.putExtra("Books",books);
+            try {
+                outputStream = openFileOutput(fileName,MODE_PRIVATE);
+                objectStream = new ObjectOutputStream(outputStream);
+                objectStream.writeObject(books);
+                outputStream.close();
+                Log.v("MyApp","Read input");
+            } catch (Exception e) {
+                Log.v("MyApp","File did not write");
+                e.printStackTrace();
+            }
             startActivity(bookIntent);
         }
     }
